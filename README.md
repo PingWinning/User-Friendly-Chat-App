@@ -90,6 +90,6 @@ This project is licensed under the **MIT License** – see the LICENSE file for 
 ## Contact
 
 For any questions or suggestions, feel free to reach out:  
-- GitHub: [dimitar-repo](https://github.com/PingWinning/User-Friendly-Chat-App.git)
+- GitHub: [User-Friendly-Chat-App](https://github.com/PingWinning/User-Friendly-Chat-App.git)
 
 Thank you for showing interest in this long-term chat project! Stay tuned for more exciting features!
