@@ -1,3 +1,7 @@
+# User-Friendly-Chat-App
+
+https://github.com/user-attachments/assets/c3793aef-1a1d-4c85-bb33-22f501f127d0
+
 ## Project Overview
 
 Welcome to the **Chat Application** project! This project is the front-end simulation for a long-term chat application project that will include various advanced features in the future. The goal of this project is to build a user-friendly, modern, and interactive chat platform, supporting real-time communication, media sharing, and video/audio calls. The front-end is designed to be responsive and visually appealing with dynamic interactions using JavaScript, HTML, TailwindCSS, and Font Awesome icons.
