@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User-Friendly Chat App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* Custom hover effects for icons */
+    .icon-btn:hover {
+      transform: scale(1.1);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    /* Call and Video Call buttons styled as circles */
+    .circular-btn {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Call button with a green gradient */
+    .call-btn {
+      background: linear-gradient(135deg, #3AE374, #2C8D59);
+    }
+
+    /* Video Call button with a blue gradient */
+    .video-btn {
+      background: linear-gradient(135deg, #4F46E5, #3B82F6);
+    }
+
+    /* Rounded chat bubbles */
+    .chat-bubble {
+      border-radius: 20px;
+      padding: 10px 15px;
+      max-width: 60%;
+      margin: 5px 0;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .chat-bubble.sent {
+      background-color: #4F46E5;
+      color: white;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .chat-bubble.received {
+      background-color: #F1F5F9;
+      color: black;
+      align-self: flex-start;
+      margin-right: auto;
+    }
+
+    /* Typing indicator animation */
+    .typing-dots {
+      display: inline-block;
+      width: 24px;
+      height: 10px;
+      position: relative;
+    }
+
+    .typing-dots span {
+      display: block;
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #A0AEC0;
+      animation: bounce 1s infinite;
+    }
+
+    .typing-dots span:nth-child(1) {
+      left: 0;
+      animation-delay: 0s;
+    }
+
+    .typing-dots span:nth-child(2) {
+      left: 8px;
+      animation-delay: 0.3s;
+    }
+
+    .typing-dots span:nth-child(3) {
+      left: 16px;
+      animation-delay: 0.6s;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    /* Voice message bubble */
+    .voice-message {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border-radius: 20px;
+      padding: 10px 15px;
+      width: auto;
+      max-width: 60%;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    .voice-message.sent {
+      background-color: #4F46E5;
+      color: white;
+      justify-content: flex-end;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .voice-message.received {
+      background-color: #F1F5F9;
+      color: #333;
+      justify-content: flex-start;
+      align-self: flex-start;
+      margin-right: auto;
+    }
+
+    .play-icon {
+      background-color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #4F46E5;
+    }
+
+    .waveform {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      visibility: hidden;
+    }
+
+    .waveform span {
+      display: inline-block;
+      width: 4px;
+      height: 20px;
+      background-color: white;
+      border-radius: 2px;
+      animation: wave 1s ease-in-out infinite;
+    }
+
+    .waveform span:nth-child(1) { animation-delay: 0s; }
+    .waveform span:nth-child(2) { animation-delay: 0.1s; }
+    .waveform span:nth-child(3) { animation-delay: 0.2s; }
+    .waveform span:nth-child(4) { animation-delay: 0.3s; }
+    .waveform span:nth-child(5) { animation-delay: 0.4s; }
+    .waveform span:nth-child(6) { animation-delay: 0.5s; }
+    .waveform span:nth-child(7) { animation-delay: 0.6s; }
+    .waveform span:nth-child(8) { animation-delay: 0.7s; }
+
+    @keyframes wave {
+      0%, 100% { height: 20px; }
+      50% { height: 10px; }
+    }
+
+    .waveform.received span {
+      background-color: #333;
+    }
+
+    /* Media icons row */
+    .media-icons {
+      display: flex;
+      gap: 15px;
+      padding: 10px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .media-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #F1F5F9;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    .media-icon i {
+      font-size: 20px;
+    }
+
+    /* Online status dot */
+    .status-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .status-dot {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .online {
+      background-color: #34D399; /* green */
+    }
+
+    .offline {
+      background-color: #EF4444; /* red */
+    }
+
+    .busy {
+      background-color: #FBBF24; /* yellow/orange */
+    }
+
+    /* Context Menu */
+    .context-menu {
+      display: none;
+      position: absolute;
+      z-index: 1000;
+      background-color: #FFF;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 150px;
+      top: 40px;
+      right: 0;
+      color: #333;
+    }
+
+    .context-menu.active {
+      display: block;
+    }
+
+    .context-menu div {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      background-color: white;
+    }
+
+    .context-menu div:last-child {
+      border-bottom: none;
+      color: red;
+    }
+
+    .context-menu div:hover {
+      background-color: #f5f5f5;
+      color: black;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col md:flex-row">
+  <!-- Sidebar -->
+  <div class="bg-white w-full md:w-1/4 p-4 shadow-lg flex flex-col">
+    <div class="flex items-center space-x-4 relative">
+      <div class="status-container">
+        <img src="https://via.placeholder.com/40" alt="Profile Image" class="w-10 h-10 rounded-full">
+        <span class="status-dot online"></span>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold">David Peters</h3>
+        <p class="text-sm text-gray-500">Senior Developer</p>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mt-6">
+      <input type="text" placeholder="Search Here..." class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+
+    <!-- Contacts -->
+    <div class="mt-6 space-y-4">
+      <div class="flex items-center space-x-4 cursor-pointer relative">
+        <div class="status-container">
+          <img src="https://via.placeholder.com/40" alt="Lisa Roy" class="w-10 h-10 rounded-full">
+          <span class="status-dot online"></span>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold">Lisa Roy</h4>
+          <p class="text-xs text-gray-500">Are you available tomorrow?</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4 cursor-pointer relative">
+        <div class="status-container">
+          <img src="https://via.placeholder.com/40" alt="Jamie Taylor" class="w-10 h-10 rounded-full">
+          <span class="status-dot offline"></span>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold">Jamie Taylor</h4>
+          <p class="text-xs text-gray-500">Nice one. Will do it tomorrow</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4 cursor-pointer relative">
+        <div class="status-container">
+          <img src="https://via.placeholder.com/40" alt="Jason Roy" class="w-10 h-10 rounded-full">
+          <span class="status-dot busy"></span>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold">Jason Roy</h4>
+          <p class="text-xs text-gray-500">Currently busy</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Chat Area -->
+  <div class="bg-gray-50 flex-1 p-4 flex flex-col">
+    <!-- Chat Messages -->
+    <div class="flex-1 flex flex-col space-y-4 overflow-y-auto">
+      <!-- Received Message -->
+      <div class="chat-bubble received" onmousedown="startLongPress(event)" onmouseup="endLongPress(event)">
+        Hi David, have you got the project report PDF?
+        <!-- Context Menu for Received Messages -->
+        <div class="context-menu">
+          <div><i class="fas fa-reply"></i> Reply</div>
+          <div><i class="fas fa-share"></i> Forward</div>
+          <div><i class="fas fa-copy"></i> Copy</div>
+        </div>
+      </div>
+
+      <!-- Sent Message -->
+      <div class="chat-bubble sent" onmousedown="startLongPress(event)" onmouseup="endLongPress(event)">
+        NO. I did not get it.
+        <!-- Context Menu for Sent Messages -->
+        <div class="context-menu">
+          <div><i class="fas fa-reply"></i> Reply</div>
+          <div><i class="fas fa-edit"></i> Edit</div>
+          <div><i class="fas fa-share"></i> Forward</div>
+          <div><i class="fas fa-copy"></i> Copy</div>
+          <div><i class="fas fa-trash"></i> Unsend</div>
+        </div>
+      </div>
+
+      <!-- PDF File Transfer Message (from Dianne Jhonson) -->
+      <div class="chat-bubble received">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-file-pdf text-red-500 text-3xl"></i>
+          <div>
+            <p class="font-semibold">project_report.pdf</p>
+            <p class="text-sm text-gray-500">1.2 MB</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Received Voice Message with Random Timer -->
+      <div class="voice-message received" onclick="togglePlay(this)">
+        <div class="play-icon" style="color: #333;">
+          <i class="fas fa-play"></i>
+        </div>
+        <div class="waveform received">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <span class="duration received"></span> <!-- Random duration will appear here -->
+      </div>
+
+      <!-- Sent Voice Message with Random Timer -->
+      <div class="voice-message sent" onclick="togglePlay(this)">
+        <div class="play-icon">
+          <i class="fas fa-play"></i>
+        </div>
+        <div class="waveform">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <span class="duration"></span> <!-- Random duration will appear here -->
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="chat-bubble received typing-indicator">
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Input -->
+    <div class="mt-4 flex items-center space-x-4">
+      <!-- Emoji Button -->
+      <button class="rounded-icon-btn shadow-lg hover:scale-105 transform transition">
+        <i class="far fa-smile text-yellow-500"></i>
+      </button>
+
+      <!-- Input Field -->
+      <input type="text" placeholder="Write something..." class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+      
+      <!-- File Upload Button -->
+      <label class="rounded-icon-btn shadow-lg hover:scale-105 transform transition">
+        <input type="file" class="hidden">
+        <i class="fas fa-paperclip text-blue-500"></i>
+      </label>
+
+      <!-- Voice Recording Button -->
+      <button class="rounded-icon-btn shadow-lg hover:scale-105 transform transition">
+        <i class="fas fa-microphone text-green-500"></i>
+      </button>
+
+      <!-- Send Button -->
+      <button class="send-btn p-2 rounded-full shadow-lg icon-btn">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+
+    <!-- Media Type Icons (PDF, Music, etc.) -->
+    <div class="media-icons">
+      <div class="media-icon">
+        <i class="fas fa-file-pdf text-red-500"></i>
+      </div>
+      <div class="media-icon">
+        <i class="fas fa-music text-purple-500"></i>
+      </div>
+      <div class="media-icon">
+        <i class="fas fa-file-video text-blue-500"></i>
+      </div>
+      <div class="media-icon">
+        <i class="fas fa-image text-yellow-500"></i>
+      </div>
+      <div class="media-icon">
+        <i class="fas fa-file-alt text-gray-500"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Profile Section -->
+  <div class="bg-white w-full md:w-1/4 p-4 shadow-lg flex flex-col">
+    <!-- Profile Image and Info -->
+    <div class="flex flex-col items-center">
+      <img src="https://via.placeholder.com/100" alt="Profile Image" class="w-20 h-20 rounded-full">
+      <h3 class="mt-2 text-lg font-semibold">Dianne Jhonson</h3>
+      <p class="text-sm text-gray-500">Junior Developer</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-6 space-y-4 w-full">
+      <!-- Call Button (Green Gradient) -->
+      <button class="call-btn text-white w-full py-2 rounded-lg flex items-center justify-center space-x-2 hover:scale-105 transform transition">
+        <i class="fas fa-phone-alt"></i>
+        <span>Call</span>
+      </button>
+
+      <!-- Video Call Button -->
+      <button class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white w-full py-2 rounded-lg flex items-center justify-center space-x-2 hover:scale-105 transform transition">
+        <i class="fas fa-video"></i>
+        <span>Video Call</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- JavaScript to handle long press and toggle waveform animation on play button click -->
+  <script>
+    let pressTimer;
+
+    function startLongPress(event) {
+      event.preventDefault();
+      const contextMenu = event.currentTarget.querySelector('.context-menu');
+
+      pressTimer = setTimeout(() => {
+        // Show context menu after long press
+        contextMenu.classList.add('active');
+      }, 800); // Long press delay (800ms)
+    }
+
+    function endLongPress(event) {
+      clearTimeout(pressTimer); // Clear the long press timer if the user releases before 800ms
+    }
+
+    // Close context menu on clicking anywhere else
+    window.addEventListener('click', function (e) {
+      document.querySelectorAll('.context-menu').forEach(menu => {
+        menu.classList.remove('active');
+      });
+    });
+
+    function togglePlay(voiceMessage) {
+      const waveform = voiceMessage.querySelector('.waveform');
+      const isPlaying = waveform.style.visibility === 'visible';
+
+      if (isPlaying) {
+        waveform.style.visibility = 'hidden'; // Stop animation
+      } else {
+        waveform.style.visibility = 'visible'; // Start animation
+      }
+    }
+
+    // Generate a random timer for each voice message
+    function generateRandomDuration() {
+      const minutes = Math.floor(Math.random() * 2); // 0 or 1 minute
+      const seconds = Math.floor(Math.random() * 60); // 0 to 59 seconds
+      return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    }
+
+    // Apply random durations to all voice messages
+    document.querySelectorAll('.duration').forEach(duration => {
+      duration.textContent = generateRandomDuration();
+    });
+  </script>
+</body>
+</html>
